@@ -19,8 +19,7 @@ fx:
     available-json-url: https://economia.awesomeapi.com.br/json/available
     last-quotes-base-url: https://economia.awesomeapi.com.br/json/last/
   poll:
-    api-interval-ms: 60000
-    simulation-interval-ms: 10000
+    api-interval-ms: 30000
     max-pairs: 500
     available-refresh-minutes: 360
 

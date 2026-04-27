@@ -2,7 +2,6 @@ package com.fx.gateway.infrastructure.persistence;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 import org.springframework.stereotype.Component;
 
@@ -20,13 +19,18 @@ public class MongoRepositoryAdapter implements ExchangeRateReadPort {
 	@Override
 	public Optional<ExchangeRateSnapshot> findLatestByPair(String pair) {
 		return exchangeRateSpringRepository.findById(pair)
-				.map(doc -> new ExchangeRateSnapshot(doc.pair(), doc.rate(), doc.timestamp(), doc.source()));
+				.map(doc -> new ExchangeRateSnapshot(pairLabel(doc), doc.rate(), doc.timestamp(), doc.source()));
 	}
 
 	@Override
 	public List<ExchangeRateSnapshot> findLatestDistinctByPair() {
-		return StreamSupport.stream(exchangeRateSpringRepository.findAll().spliterator(), false)
-				.map(doc -> new ExchangeRateSnapshot(doc.pair(), doc.rate(), doc.timestamp(), doc.source()))
+		return exchangeRateSpringRepository.findAll().stream()
+				.map(doc -> new ExchangeRateSnapshot(pairLabel(doc), doc.rate(), doc.timestamp(), doc.source()))
 				.toList();
+	}
+
+	private static String pairLabel(ExchangeRateDocument doc) {
+		String p = doc.pair();
+		return p != null && !p.isBlank() ? p : doc.id();
 	}
 }

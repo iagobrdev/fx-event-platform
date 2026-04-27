@@ -31,14 +31,14 @@ class MongoRepositoryAdapterTest {
 
 	@Test
 	void findLatestByPairDelegatesToRepository() {
-		ExchangeRateDocument doc = new ExchangeRateDocument("USD/BRL", new BigDecimal("5"), TS, RateSource.API);
+		ExchangeRateDocument doc = new ExchangeRateDocument("USD/BRL", "USD/BRL", new BigDecimal("5"), TS, RateSource.API);
 		when(exchangeRateSpringRepository.findById("USD/BRL")).thenReturn(Optional.of(doc));
 		assertThat(mongoRepositoryAdapter.findLatestByPair("USD/BRL")).contains(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API));
 	}
 
 	@Test
 	void findLatestDistinctByPairMapsAll() {
-		when(exchangeRateSpringRepository.findAll()).thenReturn(List.of(new ExchangeRateDocument("USD/BRL", new BigDecimal("5"), TS, RateSource.API)));
+		when(exchangeRateSpringRepository.findAll()).thenReturn(List.of(new ExchangeRateDocument("USD/BRL", "USD/BRL", new BigDecimal("5"), TS, RateSource.API)));
 		assertThat(mongoRepositoryAdapter.findLatestDistinctByPair()).hasSize(1);
 		verify(exchangeRateSpringRepository).findAll();
 	}

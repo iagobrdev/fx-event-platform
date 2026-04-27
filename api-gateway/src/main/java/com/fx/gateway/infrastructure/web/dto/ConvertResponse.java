@@ -1,4 +1,4 @@
-package com.fx.gateway.presentation.dto;
+package com.fx.gateway.infrastructure.web.dto;
 
 import java.math.BigDecimal;
 

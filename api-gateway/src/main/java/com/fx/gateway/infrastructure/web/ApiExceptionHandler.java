@@ -1,4 +1,4 @@
-package com.fx.gateway.presentation;
+package com.fx.gateway.infrastructure.web;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

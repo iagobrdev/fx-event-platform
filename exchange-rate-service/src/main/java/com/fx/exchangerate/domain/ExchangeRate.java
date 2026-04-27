@@ -19,8 +19,4 @@ public record ExchangeRate(CurrencyPair pair, BigDecimal rate, Instant timestamp
 	public static ExchangeRate create(CurrencyPair pair, BigDecimal rate, Instant timestamp, RateSource source) {
 		return new ExchangeRate(pair, rate, timestamp, source);
 	}
-
-	public ExchangeRate withSimulation(BigDecimal newRate, Instant newTs) {
-		return create(pair, newRate, newTs, RateSource.SIMULATION);
-	}
 }

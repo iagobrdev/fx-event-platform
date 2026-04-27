@@ -25,12 +25,4 @@ class ExchangeRateTest {
 		assertThatThrownBy(() -> ExchangeRate.create(null, BigDecimal.ONE, TS, RateSource.API)).isInstanceOf(IllegalArgumentException.class);
 	}
 
-	@Test
-	void withSimulationChangesSource() {
-		ExchangeRate r = ExchangeRate.create(CurrencyPair.of("USD/BRL"), new BigDecimal("5"), TS, RateSource.API);
-		Instant ts2 = Instant.parse("2026-01-02T00:00:00Z");
-		ExchangeRate s = r.withSimulation(new BigDecimal("5.01"), ts2);
-		assertThat(s.source()).isEqualTo(RateSource.SIMULATION);
-		assertThat(s.timestamp()).isEqualTo(ts2);
-	}
 }

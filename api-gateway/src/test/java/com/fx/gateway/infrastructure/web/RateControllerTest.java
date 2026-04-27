@@ -1,4 +1,4 @@
-package com.fx.gateway.presentation;
+package com.fx.gateway.infrastructure.web;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;

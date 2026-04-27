@@ -1,4 +1,4 @@
-package com.fx.exchangerate.presentation;
+package com.fx.exchangerate.infrastructure.web;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fx.exchangerate.application.port.out.ExchangeRateStatePort;
-import com.fx.exchangerate.presentation.dto.ExchangeRateStateResponse;
-import com.fx.exchangerate.presentation.dto.ExchangeRateStateResponse.PairRateCacheView;
+import com.fx.exchangerate.infrastructure.web.dto.ExchangeRateStateResponse;
+import com.fx.exchangerate.infrastructure.web.dto.ExchangeRateStateResponse.PairRateCacheView;
 
 import lombok.RequiredArgsConstructor;
 

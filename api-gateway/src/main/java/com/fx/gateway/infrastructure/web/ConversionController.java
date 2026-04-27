@@ -1,4 +1,4 @@
-package com.fx.gateway.presentation;
+package com.fx.gateway.infrastructure.web;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fx.gateway.application.ConvertCurrencyUseCase;
 import com.fx.gateway.domain.CurrencyCode;
-import com.fx.gateway.presentation.dto.ConvertRequest;
-import com.fx.gateway.presentation.dto.ConvertResponse;
+import com.fx.gateway.infrastructure.web.dto.ConvertRequest;
+import com.fx.gateway.infrastructure.web.dto.ConvertResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

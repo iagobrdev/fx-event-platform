@@ -1,4 +1,4 @@
-package com.fx.gateway.presentation;
+package com.fx.gateway.infrastructure.web;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fx.gateway.presentation.dto.ConvertRequest;
+import com.fx.gateway.infrastructure.web.dto.ConvertRequest;
 
 import jakarta.validation.Valid;
 

@@ -1,4 +1,4 @@
-package com.fx.exchangerate.presentation.dto;
+package com.fx.exchangerate.infrastructure.web.dto;
 
 import java.math.BigDecimal;
 import java.util.Map;

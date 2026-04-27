@@ -17,6 +17,21 @@ import com.fx.exchangerate.domain.CurrencyPair;
 import com.fx.exchangerate.domain.ExchangeRate;
 import com.fx.exchangerate.domain.RateSource;
 
+/**
+ * Refreshes the pair catalog when stale, fetches live bid rates from the Awesome API in batches, updates in-memory
+ * state, and publishes each successful or fallback rate to Kafka with {@link RateSource#API}.
+ *
+ * <p>Rules:
+ * <ul>
+ *   <li>If the catalog is empty after refresh, the use case exits without publishing.</li>
+ *   <li>Pairs are processed in chunks of 45 hyphen keys (e.g. {@code USD-BRL}) per HTTP call to the quotes API.</li>
+ *   <li>Hyphen keys are mapped to display form {@code BASE/QUOTE} (uppercase) for state, domain, and messaging.</li>
+ *   <li>When the API returns a bid for a pair: last API rate and last published rate are updated; an event is published.</li>
+ *   <li>When the API omits a pair but a cached last API rate exists: that value is republished as last published (stale quote path);
+ *       if there is no cache, the pair is skipped for this run.</li>
+ *   <li>All published events share the same {@link Instant} captured at the start of the run for that execution.</li>
+ * </ul>
+ */
 public record FetchExchangeRateUseCase(AvailableFxPairsPort availableFxPairsPort, AwesomeFxRatesPort awesomeFxRatesPort,
 		ExchangeRateStatePort exchangeRateStatePort, PublishExchangeRatePort publishExchangeRatePort) {
 
@@ -24,6 +39,9 @@ public record FetchExchangeRateUseCase(AvailableFxPairsPort availableFxPairsPort
 
 	private static final int BATCH = 45;
 
+	/**
+	 * Runs one full poll cycle: refresh catalog, fetch quotes in batches, update state, publish events.
+	 */
 	public void execute() {
 		availableFxPairsPort.refreshIfStale();
 		List<String> paths = availableFxPairsPort.awesomeHyphenPairs();

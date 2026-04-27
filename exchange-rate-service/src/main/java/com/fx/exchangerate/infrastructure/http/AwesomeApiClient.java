@@ -44,7 +44,7 @@ public class AwesomeApiClient implements AwesomeFxRatesPort {
 					.uri(url)
 					.accept(MediaType.APPLICATION_JSON)
 					.retrieve()
-					.body(new ParameterizedTypeReference<Map<String, Map<String, String>>>() {
+					.body(new ParameterizedTypeReference<>() {
 					});
 			if (body == null) {
 				return out;

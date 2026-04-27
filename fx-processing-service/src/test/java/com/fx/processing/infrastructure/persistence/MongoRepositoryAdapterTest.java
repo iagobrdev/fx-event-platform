@@ -35,6 +35,7 @@ class MongoRepositoryAdapterTest {
 		adapter.upsert(rate);
 		ArgumentCaptor<ExchangeRateDocument> cap = ArgumentCaptor.forClass(ExchangeRateDocument.class);
 		verify(exchangeRateSpringRepository).save(cap.capture());
+		assertThat(cap.getValue().id()).isEqualTo("USD/BRL");
 		assertThat(cap.getValue().pair()).isEqualTo("USD/BRL");
 		assertThat(cap.getValue().rate()).isEqualByComparingTo("5");
 	}

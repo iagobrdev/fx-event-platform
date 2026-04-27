@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.fx.exchangerate.application.FetchExchangeRateUseCase;
-import com.fx.exchangerate.application.SimulateExchangeRateUseCase;
 import com.fx.exchangerate.application.port.out.AvailableFxPairsPort;
 import com.fx.exchangerate.application.port.out.AwesomeFxRatesPort;
 import com.fx.exchangerate.application.port.out.ExchangeRateStatePort;
@@ -32,12 +31,8 @@ class ExchangeRateUseCaseConfigurationTest {
 	@Autowired
 	private FetchExchangeRateUseCase fetchExchangeRateUseCase;
 
-	@Autowired
-	private SimulateExchangeRateUseCase simulateExchangeRateUseCase;
-
 	@Test
 	void exposesUseCases() {
 		assertThat(fetchExchangeRateUseCase).isNotNull();
-		assertThat(simulateExchangeRateUseCase).isNotNull();
 	}
 }

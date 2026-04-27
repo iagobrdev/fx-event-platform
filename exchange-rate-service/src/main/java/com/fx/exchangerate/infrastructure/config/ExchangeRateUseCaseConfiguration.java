@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.fx.exchangerate.application.FetchExchangeRateUseCase;
-import com.fx.exchangerate.application.SimulateExchangeRateUseCase;
 import com.fx.exchangerate.application.port.out.AvailableFxPairsPort;
 import com.fx.exchangerate.application.port.out.AwesomeFxRatesPort;
 import com.fx.exchangerate.application.port.out.ExchangeRateStatePort;
@@ -19,11 +18,5 @@ public class ExchangeRateUseCaseConfiguration {
 			PublishExchangeRatePort publishExchangeRatePort) {
 		return new FetchExchangeRateUseCase(availableFxPairsPort, awesomeFxRatesPort, exchangeRateStatePort,
 				publishExchangeRatePort);
-	}
-
-	@Bean
-	public SimulateExchangeRateUseCase simulateExchangeRateUseCase(ExchangeRateStatePort exchangeRateStatePort,
-			PublishExchangeRatePort publishExchangeRatePort) {
-		return new SimulateExchangeRateUseCase(exchangeRateStatePort, publishExchangeRatePort);
 	}
 }

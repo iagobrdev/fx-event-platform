@@ -15,7 +15,8 @@ public class MongoRepositoryAdapter implements ExchangeRateStorePort {
 
 	@Override
 	public void upsert(ExchangeRate exchangeRate) {
-		ExchangeRateDocument document = new ExchangeRateDocument(exchangeRate.pair().value(), exchangeRate.rate(),
+		String pairValue = exchangeRate.pair().value();
+		ExchangeRateDocument document = new ExchangeRateDocument(pairValue, pairValue, exchangeRate.rate(),
 				exchangeRate.timestamp(), exchangeRate.source());
 		exchangeRateSpringRepository.save(document);
 	}

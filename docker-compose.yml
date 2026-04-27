@@ -31,7 +31,7 @@ services:
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
     tmpfs:
-      - /tmp/kraft-combined-logs
+      - /tmp/kraft-combined-logs:rw,exec,mode=1777
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server 127.0.0.1:9092 || exit 1"]
       interval: 5s

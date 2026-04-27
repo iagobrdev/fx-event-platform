@@ -1,4 +1,4 @@
-package com.fx.gateway.presentation;
+package com.fx.gateway.infrastructure.web;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fx.gateway.application.GetLatestRateUseCase;
 import com.fx.gateway.domain.ExchangeRateSnapshot;
-import com.fx.gateway.presentation.dto.RateResponse;
+import com.fx.gateway.infrastructure.web.dto.RateResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

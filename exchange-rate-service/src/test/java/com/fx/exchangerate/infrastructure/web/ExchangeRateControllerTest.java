@@ -1,4 +1,4 @@
-package com.fx.exchangerate.presentation;
+package com.fx.exchangerate.infrastructure.web;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
