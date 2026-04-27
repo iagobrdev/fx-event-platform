@@ -11,11 +11,7 @@ public record ProcessExchangeRateUseCase(ExchangeRateStorePort exchangeRateStore
 	private static final Logger log = LoggerFactory.getLogger(ProcessExchangeRateUseCase.class);
 
 	public void execute(ExchangeRate exchangeRate) {
-		if (exchangeRateStorePort.existsByPairAndTimestamp(exchangeRate.pair(), exchangeRate.timestamp())) {
-			log.debug("duplicate event ignored for pair {} at {}", exchangeRate.pair().value(), exchangeRate.timestamp());
-			return;
-		}
-		exchangeRateStorePort.save(exchangeRate);
-		log.info("exchange rate stored for pair {} at {}", exchangeRate.pair().value(), exchangeRate.timestamp());
+		exchangeRateStorePort.upsert(exchangeRate);
+		log.info("exchange rate upserted for pair {} at {}", exchangeRate.pair().value(), exchangeRate.timestamp());
 	}
 }

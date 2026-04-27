@@ -10,8 +10,7 @@ import com.fx.gateway.domain.RateSource;
 
 @Document("exchange_rates")
 public record ExchangeRateDocument(
-		@Id String id,
-		String pair,
+		@Id String pair,
 		BigDecimal rate,
 		Instant timestamp,
 		RateSource source) {
