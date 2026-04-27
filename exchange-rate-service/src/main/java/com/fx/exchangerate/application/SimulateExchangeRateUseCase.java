@@ -22,19 +22,21 @@ public record SimulateExchangeRateUseCase(ExchangeRateStatePort exchangeRateStat
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	public void execute() {
-		BigDecimal base = exchangeRateStatePort.getLastPublishedRate()
-				.or(exchangeRateStatePort::getLastApiRate)
-				.orElse(null);
-		if (base == null) {
-			log.debug("simulation skipped: no base rate");
-			return;
+		for (String display : exchangeRateStatePort.allTrackedDisplayPairs()) {
+			BigDecimal base = exchangeRateStatePort.getLastPublishedRate(display)
+					.or(() -> exchangeRateStatePort.getLastApiRate(display))
+					.orElse(null);
+			if (base == null) {
+				log.debug("simulation skipped for {}: no base rate", display);
+				continue;
+			}
+			double jitter = 0.995 + RANDOM.nextDouble() * 0.01;
+			BigDecimal simulated = base.multiply(BigDecimal.valueOf(jitter)).setScale(8, RoundingMode.HALF_UP);
+			Instant ts = Instant.now();
+			ExchangeRate rate = ExchangeRate.create(CurrencyPair.of(display), simulated, ts, RateSource.SIMULATION);
+			exchangeRateStatePort.setLastPublishedRate(display, simulated);
+			log.debug("published simulated {} {}", display, rate.rate());
+			publishExchangeRatePort.publish(rate);
 		}
-		double jitter = 0.995 + RANDOM.nextDouble() * 0.01;
-		BigDecimal simulated = base.multiply(BigDecimal.valueOf(jitter)).setScale(8, RoundingMode.HALF_UP);
-		Instant ts = Instant.now();
-		ExchangeRate rate = ExchangeRate.create(CurrencyPair.usdBrl(), simulated, ts, RateSource.SIMULATION);
-		exchangeRateStatePort.setLastPublishedRate(simulated);
-		log.info("published simulated exchange rate {}", rate.rate());
-		publishExchangeRatePort.publish(rate);
 	}
 }

@@ -8,10 +8,6 @@ public record CurrencyPair(String value) {
 		}
 	}
 
-	public static CurrencyPair usdBrl() {
-		return new CurrencyPair("USD/BRL");
-	}
-
 	public static CurrencyPair of(String raw) {
 		if (raw == null || raw.isBlank()) {
 			throw new IllegalArgumentException("pair required");

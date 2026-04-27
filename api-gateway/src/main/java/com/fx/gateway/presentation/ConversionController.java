@@ -29,7 +29,7 @@ public class ConversionController {
 				.map(ConvertResponse::new)
 				.map(ResponseEntity::ok)
 				.orElseGet(() -> {
-					log.warn("convert failed: no usd/brl rate in store");
+					log.warn("convert failed: no rate path for {} {}", request.from(), request.to());
 					return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 				});
 	}

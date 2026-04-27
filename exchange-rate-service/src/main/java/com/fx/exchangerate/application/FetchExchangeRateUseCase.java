@@ -2,10 +2,14 @@ package com.fx.exchangerate.application;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fx.exchangerate.application.port.out.AvailableFxPairsPort;
 import com.fx.exchangerate.application.port.out.AwesomeFxRatesPort;
 import com.fx.exchangerate.application.port.out.ExchangeRateStatePort;
 import com.fx.exchangerate.application.port.out.PublishExchangeRatePort;
@@ -13,32 +17,53 @@ import com.fx.exchangerate.domain.CurrencyPair;
 import com.fx.exchangerate.domain.ExchangeRate;
 import com.fx.exchangerate.domain.RateSource;
 
-public record FetchExchangeRateUseCase(AwesomeFxRatesPort awesomeFxRatesPort, ExchangeRateStatePort exchangeRateStatePort,
-		PublishExchangeRatePort publishExchangeRatePort) {
+public record FetchExchangeRateUseCase(AvailableFxPairsPort availableFxPairsPort, AwesomeFxRatesPort awesomeFxRatesPort,
+		ExchangeRateStatePort exchangeRateStatePort, PublishExchangeRatePort publishExchangeRatePort) {
 
 	private static final Logger log = LoggerFactory.getLogger(FetchExchangeRateUseCase.class);
 
+	private static final int BATCH = 45;
+
 	public void execute() {
-		var fromApi = awesomeFxRatesPort.fetchUsdBrlBid();
-		if (fromApi.isPresent()) {
-			BigDecimal v = fromApi.get();
-			exchangeRateStatePort.setLastApiRate(v);
-			Instant ts = Instant.now();
-			ExchangeRate rate = ExchangeRate.create(CurrencyPair.usdBrl(), v, ts, RateSource.API);
-			exchangeRateStatePort.setLastPublishedRate(v);
-			log.info("published api exchange rate {}", rate.rate());
-			publishExchangeRatePort.publish(rate);
-			return;
-		}
-		BigDecimal fallback = exchangeRateStatePort.getLastApiRate().orElse(null);
-		if (fallback == null) {
-			log.warn("fetch skipped: api unavailable and no last api rate");
+		availableFxPairsPort.refreshIfStale();
+		List<String> paths = availableFxPairsPort.awesomeHyphenPairs();
+		if (paths.isEmpty()) {
+			log.warn("no pair catalog yet");
 			return;
 		}
 		Instant ts = Instant.now();
-		ExchangeRate rate = ExchangeRate.create(CurrencyPair.usdBrl(), fallback, ts, RateSource.API);
-		exchangeRateStatePort.setLastPublishedRate(fallback);
-		log.warn("published cached api exchange rate {}", rate.rate());
-		publishExchangeRatePort.publish(rate);
+		for (int i = 0; i < paths.size(); i += BATCH) {
+			List<String> chunk = paths.subList(i, Math.min(i + BATCH, paths.size()));
+			Map<String, BigDecimal> bids = awesomeFxRatesPort.fetchBidsForAwesomeHyphenPairs(new ArrayList<>(chunk));
+			for (String hyphen : chunk) {
+				String display = hyphenToDisplay(hyphen);
+				BigDecimal v = bids.get(display);
+				if (v != null) {
+					exchangeRateStatePort.setLastApiRate(display, v);
+					exchangeRateStatePort.setLastPublishedRate(display, v);
+					ExchangeRate rate = ExchangeRate.create(CurrencyPair.of(display), v, ts, RateSource.API);
+					log.debug("published api {} {}", display, rate.rate());
+					publishExchangeRatePort.publish(rate);
+					continue;
+				}
+				BigDecimal fallback = exchangeRateStatePort.getLastApiRate(display).orElse(null);
+				if (fallback == null) {
+					log.debug("fetch skipped for {}: no api row and no cache", display);
+					continue;
+				}
+				exchangeRateStatePort.setLastPublishedRate(display, fallback);
+				ExchangeRate rate = ExchangeRate.create(CurrencyPair.of(display), fallback, ts, RateSource.API);
+				log.warn("published cached api {} {}", display, rate.rate());
+				publishExchangeRatePort.publish(rate);
+			}
+		}
+	}
+
+	private static String hyphenToDisplay(String hyphen) {
+		int idx = hyphen.indexOf('-');
+		if (idx <= 0 || idx == hyphen.length() - 1) {
+			return hyphen;
+		}
+		return hyphen.substring(0, idx).toUpperCase() + "/" + hyphen.substring(idx + 1).toUpperCase();
 	}
 }

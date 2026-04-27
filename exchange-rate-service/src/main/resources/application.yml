@@ -16,10 +16,13 @@ fx:
   kafka:
     topic: exchange-rate-events
   awesome-api:
-    usd-brl-url: https://economia.awesomeapi.com.br/json/last/USD-BRL
+    available-json-url: https://economia.awesomeapi.com.br/json/available
+    last-quotes-base-url: https://economia.awesomeapi.com.br/json/last/
   poll:
     api-interval-ms: 60000
     simulation-interval-ms: 10000
+    max-pairs: 500
+    available-refresh-minutes: 360
 
 management:
   endpoints:

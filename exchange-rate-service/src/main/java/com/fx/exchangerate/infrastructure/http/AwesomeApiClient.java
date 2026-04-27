@@ -1,8 +1,9 @@
 package com.fx.exchangerate.infrastructure.http;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,39 +23,50 @@ public class AwesomeApiClient implements AwesomeFxRatesPort {
 
 	private final RestClient.Builder restClientBuilder;
 
-	private final String usdBrlUrl;
+	private final String lastQuotesBaseUrl;
 
 	public AwesomeApiClient(RestClient.Builder restClientBuilder,
-			@Value("${fx.awesome-api.usd-brl-url}") String usdBrlUrl) {
+			@Value("${fx.awesome-api.last-quotes-base-url}") String lastQuotesBaseUrl) {
 		this.restClientBuilder = restClientBuilder;
-		this.usdBrlUrl = usdBrlUrl;
+		this.lastQuotesBaseUrl = lastQuotesBaseUrl;
 	}
 
 	@Override
-	public Optional<BigDecimal> fetchUsdBrlBid() {
+	public Map<String, BigDecimal> fetchBidsForAwesomeHyphenPairs(List<String> awesomeHyphenPairs) {
+		Map<String, BigDecimal> out = new HashMap<>();
+		if (awesomeHyphenPairs == null || awesomeHyphenPairs.isEmpty()) {
+			return out;
+		}
+		String url = lastQuotesBaseUrl + String.join(",", awesomeHyphenPairs);
 		try {
 			RestClient client = restClientBuilder.build();
 			Map<String, Map<String, String>> body = client.get()
-					.uri(usdBrlUrl)
+					.uri(url)
 					.accept(MediaType.APPLICATION_JSON)
 					.retrieve()
 					.body(new ParameterizedTypeReference<Map<String, Map<String, String>>>() {
 					});
-			if (body == null || !body.containsKey("USDBRL")) {
-				log.warn("unexpected awesome api payload");
-				return Optional.empty();
+			if (body == null) {
+				return out;
 			}
-			Map<String, String> pair = body.get("USDBRL");
-			String bid = pair.get("bid");
-			if (bid == null || bid.isBlank()) {
-				log.warn("missing bid in awesome api payload");
-				return Optional.empty();
+			for (Map.Entry<String, Map<String, String>> e : body.entrySet()) {
+				Map<String, String> row = e.getValue();
+				if (row == null) {
+					continue;
+				}
+				String bid = row.get("bid");
+				String code = row.get("code");
+				String codein = row.get("codein");
+				if (bid == null || bid.isBlank() || code == null || codein == null) {
+					continue;
+				}
+				String display = code.trim().toUpperCase() + "/" + codein.trim().toUpperCase();
+				out.put(display, new BigDecimal(bid.trim()));
 			}
-			return Optional.of(new BigDecimal(bid.trim()));
 		}
 		catch (RestClientException | ArithmeticException ex) {
 			log.warn("awesome api error: {}", ex.getMessage());
-			return Optional.empty();
 		}
+		return out;
 	}
 }
