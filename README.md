@@ -8,7 +8,7 @@ Event-driven FX rate platform: poll the [AwesomeAPI](https://economia.awesomeapi
 |--------|------|
 | **exchange-rate-service** | Scheduled fetch of available pairs and last quotes (batched HTTP), in-memory cache, Kafka producer (`exchange-rate-events`). |
 | **fx-processing-service** | Kafka consumer; normalizes events and upserts documents in MongoDB collection `exchange_rates`. |
-| **api-gateway** | Reads from MongoDB; exposes `/rates` and `/convert`; uses in-memory graph for cross-rate paths. |
+| **api-gateway** | Reads from MongoDB; exposes `/rates`, `/rates/all` (paginated), `/convert`; uses in-memory graph for cross-rate paths. |
 
 Stack: **Java 21**, **Spring Boot 3.x**, **MongoDB**, **Kafka (KRaft)**.
 
@@ -42,6 +42,8 @@ Services and default host ports:
 ```bash
 curl "http://localhost:8080/rates?pair=USD/BRL"
 
+curl -s "http://localhost:8080/rates/all?page=0&size=20&sort=pair,asc"
+
 curl -s -X POST http://localhost:8080/convert \
   -H "Content-Type: application/json" \
   -d '{"from":"USD","to":"BRL","amount":100}'
@@ -54,6 +56,7 @@ curl -s http://localhost:8081/exchange-rate/state
 - **exchange-rate-service**: `fx.poll.api-interval-ms` (default 30s) drives how often the full fetch runs. Pairs and quotes use the AwesomeAPI URLs in `application.yml`. Max pairs and catalog refresh are under `fx.poll.*`.
 - **Kafka topic** (all services): `exchange-rate-events` (see `fx.kafka.topic` / consumer subscription).
 - **MongoDB URI** for gateway and processing: `MONGODB_URI` (compose sets `mongodb://mongodb:27017/fx`).
+- **Read API** (`/rates`, `/rates/all`): each item includes **`rate`** (latest) and **`previousRate`** (value that was current on the prior write, for that pair; `null` on the first write or legacy documents). The front can compare the two to show up/down.
 
 ## Build and test (per module)
 

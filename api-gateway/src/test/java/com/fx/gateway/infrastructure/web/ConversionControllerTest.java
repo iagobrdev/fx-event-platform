@@ -37,7 +37,7 @@ class ConversionControllerTest {
 	@Test
 	void convertsWhenPathExists() throws Exception {
 		when(exchangeRateReadPort.findLatestDistinctByPair())
-				.thenReturn(List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API)));
+				.thenReturn(List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API, null)));
 		String body = "{\"from\":\"USD\",\"to\":\"BRL\",\"amount\":2}";
 		mockMvc.perform(post("/convert").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.result").value(10));

@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import com.fx.gateway.application.ConvertCurrencyUseCase;
 import com.fx.gateway.application.GetLatestRateUseCase;
+import com.fx.gateway.application.ListAllRatesUseCase;
 import com.fx.gateway.application.port.out.ExchangeRateReadPort;
 
 @SpringBootTest(classes = GatewayUseCaseConfiguration.class)
@@ -22,9 +23,13 @@ class GatewayUseCaseConfigurationTest {
 	@Autowired
 	private ConvertCurrencyUseCase convertCurrencyUseCase;
 
+	@Autowired
+	private ListAllRatesUseCase listAllRatesUseCase;
+
 	@Test
 	void exposesUseCaseBeans() {
 		assertThat(getLatestRateUseCase).isNotNull();
 		assertThat(convertCurrencyUseCase).isNotNull();
+		assertThat(listAllRatesUseCase).isNotNull();
 	}
 }

@@ -5,5 +5,5 @@ import java.time.Instant;
 
 import com.fx.gateway.domain.RateSource;
 
-public record RateResponse(String pair, BigDecimal rate, Instant timestamp, RateSource source) {
+public record RateResponse(String pair, BigDecimal rate, Instant timestamp, RateSource source, BigDecimal previousRate) {
 }

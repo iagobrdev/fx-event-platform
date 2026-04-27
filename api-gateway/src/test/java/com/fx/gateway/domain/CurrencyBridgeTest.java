@@ -27,28 +27,28 @@ class CurrencyBridgeTest {
 
 	@Test
 	void skipsMalformedAndNonPositiveRates() {
-		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("BADPAIR", BigDecimal.ONE, TS, RateSource.API),
-				new ExchangeRateSnapshot("USD/BRL", BigDecimal.ZERO, TS, RateSource.API),
-				new ExchangeRateSnapshot("USD/BRL", new BigDecimal("-1"), TS, RateSource.API));
+		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("BADPAIR", BigDecimal.ONE, TS, RateSource.API, null),
+				new ExchangeRateSnapshot("USD/BRL", BigDecimal.ZERO, TS, RateSource.API, null),
+				new ExchangeRateSnapshot("USD/BRL", new BigDecimal("-1"), TS, RateSource.API, null));
 		assertThat(CurrencyBridge.convert(CurrencyCode.of("USD"), CurrencyCode.of("BRL"), BigDecimal.ONE, list)).isEmpty();
 	}
 
 	@Test
 	void directQuote() {
-		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API));
+		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API, null));
 		assertThat(CurrencyBridge.convert(CurrencyCode.of("USD"), CurrencyCode.of("BRL"), new BigDecimal("2"), list)).hasValueSatisfying(v -> assertThat(v).isEqualByComparingTo("10"));
 	}
 
 	@Test
 	void inverseQuote() {
-		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API));
+		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API, null));
 		assertThat(CurrencyBridge.convert(CurrencyCode.of("BRL"), CurrencyCode.of("USD"), new BigDecimal("10"), list)).isPresent();
 	}
 
 	@Test
 	void multiHopThroughBridge() {
-		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API),
-				new ExchangeRateSnapshot("EUR/BRL", new BigDecimal("5.5"), TS, RateSource.API));
+		List<ExchangeRateSnapshot> list = List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API, null),
+				new ExchangeRateSnapshot("EUR/BRL", new BigDecimal("5.5"), TS, RateSource.API, null));
 		Optional<BigDecimal> out = CurrencyBridge.convert(CurrencyCode.of("USD"), CurrencyCode.of("EUR"), BigDecimal.ONE, list);
 		assertThat(out).isPresent();
 		assertThat(out.get()).isGreaterThan(BigDecimal.ZERO);

@@ -28,7 +28,7 @@ class GetLatestRateUseCaseTest {
 	@Test
 	void returnsSnapshotWhenPresent() {
 		when(exchangeRateReadPort.findLatestByPair("USD/BRL"))
-				.thenReturn(Optional.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API)));
+				.thenReturn(Optional.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API, null)));
 		GetLatestRateUseCase useCase = new GetLatestRateUseCase(exchangeRateReadPort);
 		assertThat(useCase.execute("usd/brl")).isPresent();
 	}

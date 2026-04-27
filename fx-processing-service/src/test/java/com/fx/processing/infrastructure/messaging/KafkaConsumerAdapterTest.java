@@ -1,5 +1,6 @@
 package com.fx.processing.infrastructure.messaging;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,8 +43,8 @@ class KafkaConsumerAdapterTest {
 	}
 
 	@Test
-	void ignoresMalformedJson() {
-		adapter.onMessage("{");
+	void rejectsMalformedJson() {
+		assertThrows(IllegalStateException.class, () -> adapter.onMessage("{"));
 		verify(exchangeRateStorePort, never()).upsert(any());
 	}
 
@@ -55,9 +56,9 @@ class KafkaConsumerAdapterTest {
 	}
 
 	@Test
-	void skipsInvalidDomainPayload() {
+	void rejectsInvalidDomainPayload() {
 		String json = "{\"pair\":\"INVALID\",\"rate\":5,\"timestamp\":\"" + TS + "\",\"source\":\"API\"}";
-		adapter.onMessage(json);
+		assertThrows(IllegalArgumentException.class, () -> adapter.onMessage(json));
 		verify(exchangeRateStorePort, never()).upsert(any());
 	}
 }

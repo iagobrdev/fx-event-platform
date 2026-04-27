@@ -34,9 +34,11 @@ public class KafkaConsumerAdapter {
 		}
 		catch (JsonProcessingException ex) {
 			log.error("invalid kafka payload", ex);
+			throw new IllegalStateException("invalid kafka payload", ex);
 		}
 		catch (IllegalArgumentException ex) {
 			log.warn("rejected event: {}", ex.getMessage());
+			throw ex;
 		}
 	}
 }

@@ -16,10 +16,14 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 fx:
   kafka:
     topic: exchange-rate-events
+    dlq-topic: ${FX_KAFKA_DLQ_TOPIC:exchange-rate-events-dlq}
 
 management:
   endpoints:

@@ -14,5 +14,6 @@ public record ExchangeRateDocument(
 		String pair,
 		BigDecimal rate,
 		Instant timestamp,
-		RateSource source) {
+		RateSource source,
+		BigDecimal previousRate) {
 }

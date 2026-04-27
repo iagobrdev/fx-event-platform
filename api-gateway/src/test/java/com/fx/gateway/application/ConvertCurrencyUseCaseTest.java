@@ -29,7 +29,7 @@ class ConvertCurrencyUseCaseTest {
 	@Test
 	void convertsUsingSnapshots() {
 		when(exchangeRateReadPort.findLatestDistinctByPair()).thenReturn(
-				List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API)));
+				List.of(new ExchangeRateSnapshot("USD/BRL", new BigDecimal("5"), TS, RateSource.API, null)));
 		ConvertCurrencyUseCase useCase = new ConvertCurrencyUseCase(exchangeRateReadPort);
 		assertThat(useCase.execute(CurrencyCode.of("USD"), CurrencyCode.of("BRL"), new BigDecimal("2"))).hasValueSatisfying(v -> assertThat(v).isEqualByComparingTo("10"));
 	}

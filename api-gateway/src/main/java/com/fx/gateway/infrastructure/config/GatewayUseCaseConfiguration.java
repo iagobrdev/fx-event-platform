@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.fx.gateway.application.ConvertCurrencyUseCase;
 import com.fx.gateway.application.GetLatestRateUseCase;
+import com.fx.gateway.application.ListAllRatesUseCase;
 import com.fx.gateway.application.port.out.ExchangeRateReadPort;
 
 @Configuration
@@ -18,5 +19,10 @@ public class GatewayUseCaseConfiguration {
 	@Bean
 	public ConvertCurrencyUseCase convertCurrencyUseCase(ExchangeRateReadPort exchangeRateReadPort) {
 		return new ConvertCurrencyUseCase(exchangeRateReadPort);
+	}
+
+	@Bean
+	public ListAllRatesUseCase listAllRatesUseCase(ExchangeRateReadPort exchangeRateReadPort) {
+		return new ListAllRatesUseCase(exchangeRateReadPort);
 	}
 }
