@@ -17,6 +17,10 @@ Stack: **Java 21**, **Spring Boot 3.x**, **MongoDB**, **Kafka (KRaft)**.
 - **Docker** and **Docker Compose** (recommended for full stack).
 - Or **JDK 21** and **Maven 3.9+** for local JVM runs plus your own Kafka and MongoDB.
 
+## Repo notes
+
+- O `.gitignore` ignora apenas a pasta `out/` na **raiz** (`/out/`) para não esconder pacotes Java como `.../application/port/out/...` (isso quebrava builds quando arquivos “port out” não iam para o git).
+
 ## Run with Docker Compose
 
 From the repository root:
@@ -53,17 +57,40 @@ curl -s http://localhost:8081/exchange-rate/state
 
 ## Configuration highlights
 
-- **exchange-rate-service**: `fx.poll.api-interval-ms` (default 30s) drives how often the full fetch runs. Pairs and quotes use the AwesomeAPI URLs in `application.yml`. Max pairs and catalog refresh are under `fx.poll.*`.
-- **Kafka topic** (all services): `exchange-rate-events` (see `fx.kafka.topic` / consumer subscription).
-- **MongoDB URI** for gateway and processing: `MONGODB_URI` (compose sets `mongodb://mongodb:27017/fx`).
-- **Read API** (`/rates`, `/rates/all`): each item includes **`rate`** (latest) and **`previousRate`** (value that was current on the prior write, for that pair; `null` on the first write or legacy documents). The front can compare the two to show up/down.
+- **exchange-rate-service**
+  - **Kafka**: `KAFKA_BOOTSTRAP_SERVERS` (Spring `spring.kafka.bootstrap-servers`).
+  - **Tópico**: `FX_KAFKA_TOPIC` (opcional; default `exchange-rate-events`).
+  - **AwesomeAPI**
+    - URLs: `FX_AWESOME_API_AVAILABLE_JSON_URL`, `FX_AWESOME_API_LAST_QUOTES_BASE_URL` (opcional; defaults no `application.yml`).
+    - Token (query `token`): `FX_AWESOME_API_TOKEN` → vira `...?token=...` automaticamente nos GETs.
+  - **Polling**
+    - Intervalo: `FX_POLL_API_INTERVAL_MS` → `fx.poll.api-interval-ms`.
+    - Catálogo (modo “available”): `FX_POLL_MAX_PAIRS`, `FX_POLL_AVAILABLE_REFRESH_MINUTES`.
+    - **Pares fixos USD** (recomendado pra reduzir chamadas): `FX_POLL_FIXED_USD_QUOTES` (CSV tipo `BRL,EUR,GBP`) → monta `USD-BRL`, `USD-EUR`, … e **não** depende do refresh do catálogo no use case (ainda pode existir warm-up do client de `/available` no startup).
+- **fx-processing-service**: `MONGODB_URI`, `KAFKA_BOOTSTRAP_SERVERS`, `FX_KAFKA_DLQ_TOPIC` (opcional).
+- **api-gateway**: `MONGODB_URI` (precisa incluir **nome do database** no path, ex. `/fx`, e normalmente `authSource=admin` quando o usuário é criado no `admin`).
+- **Kafka topic** (pipeline): `exchange-rate-events` (veja `fx.kafka.topic` no producer e a subscription no consumer).
+- **MongoDB URI** no compose local: `mongodb://mongodb:27017/fx`.
+- **Read API** (`/rates`, `/rates/all`): cada item inclui **`rate`** (atual) e **`previousRate`** (valor que era o atual no write anterior daquele par; `null` no primeiro write ou docs legados).
+
+## Deploy (Easypanel + GitHub Actions)
+
+- Cada serviço pode ser um app separado no Easypanel (build via Dockerfile na pasta do módulo).
+- **Kafka** deve ser exposto como **TCP :9092** (não use “Domínio HTTP” pra broker).
+- **MongoDB**: use hostname interno do serviço (ex. `fx-event-platform_mongo`) e URI com database + auth.
+- O workflow `.github/workflows/deploy.yml` dispara webhooks do Easypanel via secrets:
+  - `EASY_PANEL_URL_API_GATEWAY`
+  - `EASY_PANEL_URL_EXCHANGE_RATE_SERVICE`
+  - `EASY_PANEL_URL_FX_PROCESSING_SERVICE`
 
 ## Build and test (per module)
 
+Repositório inclui **Maven Wrapper** (`mvnw` + `.mvn/`) para builds reproduzíveis nos Dockerfiles.
+
 ```bash
-cd api-gateway && mvn verify
-cd ../exchange-rate-service && mvn verify
-cd ../fx-processing-service && mvn verify
+cd api-gateway && ./mvnw verify
+cd ../exchange-rate-service && ./mvnw verify
+cd ../fx-processing-service && ./mvnw verify
 ```
 
 `verify` runs tests and JaCoCo line-coverage checks (where configured in each `pom.xml`).
@@ -71,4 +98,3 @@ cd ../fx-processing-service && mvn verify
 ## Documentation
 
 - [Architecture overview](docs/architecture.md) — context, data flow, layering, and integration points.
-
