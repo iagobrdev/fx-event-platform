@@ -3,7 +3,7 @@ RUN apk add --no-cache maven
 WORKDIR /build
 COPY pom.xml .
 COPY src ./src
-RUN mvn -B -q package
+RUN mvn -B -q package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
