@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fx.exchangerate.application.port.out.AwesomeFxRatesPort;
 
@@ -25,10 +26,14 @@ public class AwesomeApiClient implements AwesomeFxRatesPort {
 
 	private final String lastQuotesBaseUrl;
 
+	private final String token;
+
 	public AwesomeApiClient(RestClient.Builder restClientBuilder,
-			@Value("${fx.awesome-api.last-quotes-base-url}") String lastQuotesBaseUrl) {
+			@Value("${fx.awesome-api.last-quotes-base-url}") String lastQuotesBaseUrl,
+			@Value("${fx.awesome-api.token:}") String token) {
 		this.restClientBuilder = restClientBuilder;
 		this.lastQuotesBaseUrl = lastQuotesBaseUrl;
+		this.token = token;
 	}
 
 	@Override
@@ -38,6 +43,9 @@ public class AwesomeApiClient implements AwesomeFxRatesPort {
 			return out;
 		}
 		String url = lastQuotesBaseUrl + String.join(",", awesomeHyphenPairs);
+		if (token != null && !token.isBlank()) {
+			url = UriComponentsBuilder.fromHttpUrl(url).queryParam("token", token.trim()).build(true).toUriString();
+		}
 		try {
 			RestClient client = restClientBuilder.build();
 			Map<String, Map<String, String>> body = client.get()

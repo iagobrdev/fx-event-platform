@@ -23,7 +23,7 @@ class AwesomeAvailablePairsClientTest {
 	void setUp() {
 		RestClient.Builder builder = RestClient.builder();
 		server = MockRestServiceServer.bindTo(builder).build();
-		client = new AwesomeAvailablePairsClient(builder, "http://localhost/available", 2, 0L);
+		client = new AwesomeAvailablePairsClient(builder, "http://localhost/available", "", 2, 0L);
 	}
 
 	@AfterEach
@@ -37,6 +37,19 @@ class AwesomeAvailablePairsClientTest {
 		server.expect(requestTo("http://localhost/available")).andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 		client.refreshIfStale();
 		assertThat(client.awesomeHyphenPairs()).containsExactly("a-a", "b-b");
+	}
+
+	@Test
+	void appendsTokenQueryParamWhenConfigured() {
+		RestClient.Builder builder = RestClient.builder();
+		MockRestServiceServer localServer = MockRestServiceServer.bindTo(builder).build();
+		AwesomeAvailablePairsClient tokenClient = new AwesomeAvailablePairsClient(builder, "http://localhost/available", "abc",
+				2, 0L);
+		String json = "{\"z-z\":\"1\",\"a-a\":\"2\",\"b-b\":\"3\"}";
+		localServer.expect(requestTo("http://localhost/available?token=abc")).andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+		tokenClient.refreshIfStale();
+		assertThat(tokenClient.awesomeHyphenPairs()).containsExactly("a-a", "b-b");
+		localServer.verify();
 	}
 
 	@Test

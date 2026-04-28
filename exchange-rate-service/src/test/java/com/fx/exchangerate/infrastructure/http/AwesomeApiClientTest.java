@@ -25,7 +25,7 @@ class AwesomeApiClientTest {
 	void setUp() {
 		RestClient.Builder builder = RestClient.builder();
 		server = MockRestServiceServer.bindTo(builder).build();
-		client = new AwesomeApiClient(builder, "http://localhost/last/");
+		client = new AwesomeApiClient(builder, "http://localhost/last/", "");
 	}
 
 	@AfterEach
@@ -45,6 +45,19 @@ class AwesomeApiClientTest {
 		server.expect(requestTo("http://localhost/last/USd-BRL")).andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 		Map<String, BigDecimal> out = client.fetchBidsForAwesomeHyphenPairs(List.of("USd-BRL"));
 		assertThat(out).containsEntry("USD/BRL", new BigDecimal("5.12"));
+	}
+
+	@Test
+	void appendsTokenQueryParamWhenConfigured() {
+		RestClient.Builder builder = RestClient.builder();
+		MockRestServiceServer localServer = MockRestServiceServer.bindTo(builder).build();
+		AwesomeApiClient tokenClient = new AwesomeApiClient(builder, "http://localhost/last/", "abc");
+		String json = "{\"USDBRL\":{\"bid\":\"5.12\",\"code\":\"USD\",\"codein\":\"BRL\"}}";
+		localServer.expect(requestTo("http://localhost/last/USd-BRL?token=abc"))
+				.andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+		Map<String, BigDecimal> out = tokenClient.fetchBidsForAwesomeHyphenPairs(List.of("USd-BRL"));
+		assertThat(out).containsEntry("USD/BRL", new BigDecimal("5.12"));
+		localServer.verify();
 	}
 
 	@Test

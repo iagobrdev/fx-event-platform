@@ -18,6 +18,7 @@ fx:
   awesome-api:
     available-json-url: https://economia.awesomeapi.com.br/json/available
     last-quotes-base-url: https://economia.awesomeapi.com.br/json/last/
+    token: ${FX_AWESOME_API_TOKEN:}
   poll:
     api-interval-ms: 30000
     max-pairs: 500

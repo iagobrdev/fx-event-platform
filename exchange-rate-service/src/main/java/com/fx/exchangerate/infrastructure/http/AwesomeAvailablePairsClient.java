@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fx.exchangerate.application.port.out.AvailableFxPairsPort;
 
@@ -31,6 +32,8 @@ public class AwesomeAvailablePairsClient implements AvailableFxPairsPort {
 
 	private final String availableJsonUrl;
 
+	private final String token;
+
 	private final int maxPairs;
 
 	private final Duration minRefreshInterval;
@@ -41,10 +44,12 @@ public class AwesomeAvailablePairsClient implements AvailableFxPairsPort {
 
 	public AwesomeAvailablePairsClient(RestClient.Builder restClientBuilder,
 			@Value("${fx.awesome-api.available-json-url}") String availableJsonUrl,
+			@Value("${fx.awesome-api.token:}") String token,
 			@Value("${fx.poll.max-pairs:500}") int maxPairs,
 			@Value("${fx.poll.available-refresh-minutes:360}") long availableRefreshMinutes) {
 		this.restClientBuilder = restClientBuilder;
 		this.availableJsonUrl = availableJsonUrl;
+		this.token = token;
 		this.maxPairs = maxPairs;
 		this.minRefreshInterval = Duration.ofMinutes(availableRefreshMinutes);
 	}
@@ -67,8 +72,13 @@ public class AwesomeAvailablePairsClient implements AvailableFxPairsPort {
 		}
 		try {
 			RestClient client = restClientBuilder.build();
+			String url = availableJsonUrl;
+			if (token != null && !token.isBlank()) {
+				url = UriComponentsBuilder.fromHttpUrl(availableJsonUrl).queryParam("token", token.trim()).build(true)
+						.toUriString();
+			}
 			Map<String, String> body = client.get()
-					.uri(availableJsonUrl)
+					.uri(url)
 					.accept(MediaType.APPLICATION_JSON)
 					.retrieve()
 					.body(new ParameterizedTypeReference<Map<String, String>>() {
