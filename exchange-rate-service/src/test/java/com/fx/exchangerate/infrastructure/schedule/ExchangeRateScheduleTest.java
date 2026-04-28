@@ -24,7 +24,7 @@ class ExchangeRateScheduleTest {
 		PublishExchangeRatePort publishExchangeRatePort = Mockito.mock(PublishExchangeRatePort.class);
 		when(availableFxPairsPort.awesomeHyphenPairs()).thenReturn(List.of());
 		FetchExchangeRateUseCase fetch = new FetchExchangeRateUseCase(availableFxPairsPort, awesomeFxRatesPort, exchangeRateStatePort,
-				publishExchangeRatePort);
+				publishExchangeRatePort, List.of());
 		ExchangeRateSchedule schedule = new ExchangeRateSchedule(fetch);
 		schedule.pollApi();
 		verify(availableFxPairsPort).refreshIfStale();

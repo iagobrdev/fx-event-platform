@@ -3,6 +3,7 @@ package com.fx.exchangerate.application;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +42,7 @@ class FetchExchangeRateUseCaseTest {
 	@BeforeEach
 	void setUp() {
 		fetchExchangeRateUseCase = new FetchExchangeRateUseCase(availableFxPairsPort, awesomeFxRatesPort, exchangeRateStatePort,
-				publishExchangeRatePort);
+				publishExchangeRatePort, List.of());
 	}
 
 	@Test
@@ -67,5 +68,17 @@ class FetchExchangeRateUseCaseTest {
 		when(exchangeRateStatePort.getLastApiRate("USD/BRL")).thenReturn(java.util.Optional.of(new BigDecimal("4.9")));
 		fetchExchangeRateUseCase.execute();
 		verify(publishExchangeRatePort).publish(any());
+	}
+
+	@Test
+	void usesFixedUsdQuotesWithoutRefreshingCatalog() {
+		fetchExchangeRateUseCase = new FetchExchangeRateUseCase(availableFxPairsPort, awesomeFxRatesPort, exchangeRateStatePort,
+				publishExchangeRatePort, List.of("brl", " eur "));
+		when(awesomeFxRatesPort.fetchBidsForAwesomeHyphenPairs(anyList()))
+				.thenReturn(Map.of("USD/BRL", new BigDecimal("5"), "USD/EUR", new BigDecimal("0.9")));
+		fetchExchangeRateUseCase.execute();
+		verify(availableFxPairsPort, never()).refreshIfStale();
+		verify(awesomeFxRatesPort).fetchBidsForAwesomeHyphenPairs(List.of("USD-BRL", "USD-EUR"));
+		verify(publishExchangeRatePort, times(2)).publish(any());
 	}
 }

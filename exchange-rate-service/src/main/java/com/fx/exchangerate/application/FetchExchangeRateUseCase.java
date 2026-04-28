@@ -33,7 +33,8 @@ import com.fx.exchangerate.domain.RateSource;
  * </ul>
  */
 public record FetchExchangeRateUseCase(AvailableFxPairsPort availableFxPairsPort, AwesomeFxRatesPort awesomeFxRatesPort,
-		ExchangeRateStatePort exchangeRateStatePort, PublishExchangeRatePort publishExchangeRatePort) {
+		ExchangeRateStatePort exchangeRateStatePort, PublishExchangeRatePort publishExchangeRatePort,
+		List<String> fixedUsdQuotes) {
 
 	private static final Logger log = LoggerFactory.getLogger(FetchExchangeRateUseCase.class);
 
@@ -43,8 +44,20 @@ public record FetchExchangeRateUseCase(AvailableFxPairsPort availableFxPairsPort
 	 * Runs one full poll cycle: refresh catalog, fetch quotes in batches, update state, publish events.
 	 */
 	public void execute() {
-		availableFxPairsPort.refreshIfStale();
-		List<String> paths = availableFxPairsPort.awesomeHyphenPairs();
+		List<String> paths;
+		if (fixedUsdQuotes != null && !fixedUsdQuotes.isEmpty()) {
+			paths = new ArrayList<>(fixedUsdQuotes.size());
+			for (String q : fixedUsdQuotes) {
+				if (q == null || q.isBlank()) {
+					continue;
+				}
+				paths.add("USD-" + q.trim().toUpperCase());
+			}
+		}
+		else {
+			availableFxPairsPort.refreshIfStale();
+			paths = availableFxPairsPort.awesomeHyphenPairs();
+		}
 		if (paths.isEmpty()) {
 			log.warn("no pair catalog yet");
 			return;

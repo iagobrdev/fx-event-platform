@@ -23,6 +23,7 @@ fx:
     api-interval-ms: 30000
     max-pairs: 500
     available-refresh-minutes: 360
+    fixed-usd-quotes: ${FX_POLL_FIXED_USD_QUOTES:}
 
 management:
   endpoints:
