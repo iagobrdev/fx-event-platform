@@ -1,0 +1,23 @@
+name: Deploy to Easypanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Easypanel Deployment api-gateway
+        run: |
+          curl -X POST "${{ secrets.EASY_PANEL_URL_API_GATEWAY }}"
+      
+      - name: Trigger Easypanel Deployment exchange-rate-service
+        run: |
+          curl -X POST "${{ secrets.EASY_PANEL_URL_EXCHANGE_RATE_SERVICE }}"
+
+      - name: Trigger Easypanel Deployment fx-processing-service
+        run: |
+          curl -X POST "${{ secrets.EASY_PANEL_URL_FX_PROCESSING_SERVICE }}"
